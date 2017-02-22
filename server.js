@@ -5,8 +5,6 @@ const port = 2525;
 const scriptMap = require('./scripts.json');
 
 const requestHandler = (request, response) => {  
-  console.log(request.url)
-
   let parts = request.url.split('/');
 
   if(parts[1] === 'deploy') {
