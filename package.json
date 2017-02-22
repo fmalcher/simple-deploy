@@ -1,0 +1,8 @@
+{
+  "name": "deploy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "author": "Ferdinand Malcher",
+  "license": "ISC"
+}
