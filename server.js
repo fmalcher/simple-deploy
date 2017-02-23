@@ -51,6 +51,8 @@ const handleDeploy = (res, key, bodyJson) => {
       res.end('Nothing to do here');
     }
 
+  } else {
+    res.end('Invalid command');
   }
 }
 
