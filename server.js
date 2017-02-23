@@ -4,20 +4,57 @@ const port = 2525;
 
 const scriptMap = require('./scripts.json');
 
-const requestHandler = (request, response) => {  
-  let parts = request.url.split('/');
+const requestHandler = (req, res) => {  
+  let parts = req.url.split('/');
 
-  if(parts[1] === 'deploy') {
+  let body = [];
+  req.on('data', chunk => {
+    body.push(chunk);
+  }).on('end', () => {
+    body = Buffer.concat(body).toString();
+    
+    if(parts[1] === 'deploy') {
       let key = parts[2];
-      if(scriptMap.hasOwnProperty(key)) {
-          let script = scriptMap[key];
-          console.log(script);
-          exec(script, () => {});
-      }
-  }
+      return handleDeploy(res, key, body);
+    }
 
-  response.end('OK');
+    res.end('No action');
+  });
 }
+
+
+const handleDeploy = (res, key, bodyJson) => {
+  if(scriptMap.hasOwnProperty(key)) {
+    let { branch, script } = scriptMap[key];
+
+    let body = JSON.parse(bodyJson);
+    let destBranch = body.ref.split('/').slice(-1)[0];
+
+    if(destBranch === branch) {
+      exec(script, (error, stdout, stderr) => {
+        
+        if(error) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(error));
+          return;
+        }
+
+        let output = [];
+        output.push(stdout);
+        output.push(stderr);
+
+        res.end(output.join('\n'));
+
+      });
+
+    } else {
+      res.end('Nothing to do here');
+    }
+
+  }
+}
+
+
 
 const server = http.createServer(requestHandler);
 
